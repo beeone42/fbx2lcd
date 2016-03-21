@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 
-import os, json, sys, requests, time, hmac
+import os, json, sys, requests, time, hmac, serial, io
 from hashlib import sha1
 from subprocess import Popen, PIPE
+from lcd import *
 
 def r(cmd_line):
     return Popen(cmd_line.split(), stdout=PIPE).communicate()[0]
@@ -17,6 +18,10 @@ DEVICE_NAME = r('hostname').strip()
 
 STOK = ''
 
+ser = serial.Serial('/dev/ttyACM0', 9600, timeout=20, parity=serial.PARITY_NONE)
+
+lcd_clr(ser)
+lcd_wrap_on(ser)
 
 def sizeof_fmt(num):
     num /= 1024.0
@@ -67,6 +72,7 @@ def authorize():
     sys.exit(1)
 
 def get_session(config):
+    lcd(ser, "|  FreeBox     |    |      BeeOne  |")
     tmp = req('/api/v3/login/')
     if (tmp['success'] == False):
         sys.exit(2)
@@ -87,7 +93,9 @@ def open_and_load_config():
             return json.loads(config_file.read())
     else:
         print "File [%s] doesn't exist, need to authorize." % (CONFIG_FILE)
+        lcd(ser, "|  FreeBox     |    |   Authorize  |")
         authorize()
+        lcd_clr(ser)
         return open_and_load_config()
 
 if __name__ == "__main__":
@@ -95,7 +103,13 @@ if __name__ == "__main__":
     while True:
         datas = req('/api/v3/connection/')
         if (datas['success'] == True):
-            print "% 11s:% 11s" % (sizeof_fmt(datas['result']['rate_up']), sizeof_fmt(datas['result']['rate_down']))
+            lcd_clr(ser)
+            if (int(datas['result']['rate_up']) > int(datas['result']['rate_down'])):
+                lcd_blue(ser)
+            else:
+                lcd_green(ser)
+            lcd(ser, "UP: % 11s     " % (sizeof_fmt(datas['result']['rate_up'])))
+            lcd(ser, "DN: % 11s" % (sizeof_fmt(datas['result']['rate_down'])))
         else:
             STOK = get_session(config)
             print STOK
