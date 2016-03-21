@@ -17,6 +17,11 @@ DEVICE_NAME = r('hostname').strip()
 
 STOK = ''
 
+
+def sizeof_fmt(num):
+    num /= 1024.0
+    return "%.2f Ko" % (num)
+
 def req(path, data = ''):
     url = 'http://' + HOST + path
     if (data == ''):
@@ -90,7 +95,7 @@ if __name__ == "__main__":
     while True:
         datas = req('/api/v3/connection/')
         if (datas['success'] == True):
-            print str(datas['result']['rate_up']) + ':' + str(datas['result']['rate_down'])
+            print "% 11s:% 11s" % (sizeof_fmt(datas['result']['rate_up']), sizeof_fmt(datas['result']['rate_down']))
         else:
             STOK = get_session(config)
             print STOK
