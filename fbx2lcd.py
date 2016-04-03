@@ -29,14 +29,17 @@ def sizeof_fmt(num):
 
 def req(path, data = ''):
     url = 'http://' + HOST + path
-    if (data == ''):
-        headers = {'X-Fbx-App-Auth': STOK}
-        res = requests.get(url, headers=headers)
-    else:
-        headers = {'content-type': 'application/json', 'X-Fbx-App-Auth': STOK}
-        res = requests.post(url, data=json.dumps(data), headers=headers)
-    result = json.loads(res.text)
-    return result
+    try:
+        if (data == ''):
+            headers = {'X-Fbx-App-Auth': STOK}
+            res = requests.get(url, headers=headers)
+        else:
+            headers = {'content-type': 'application/json', 'X-Fbx-App-Auth': STOK}
+            res = requests.post(url, data=json.dumps(data), headers=headers)
+        result = json.loads(res.text)
+        return result
+    except:
+        return False
 
 def authorize():
     data = {}
@@ -102,7 +105,7 @@ if __name__ == "__main__":
     config = open_and_load_config()
     while True:
         datas = req('/api/v3/connection/')
-        if (datas['success'] == True):
+        if ((datas != False) and datas.has_key('success') and (datas['success'] == True)):
             lcd_clr(ser)
             if (int(datas['result']['rate_up']) > int(datas['result']['rate_down'])):
                 lcd_blue(ser)
