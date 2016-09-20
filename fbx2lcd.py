@@ -77,7 +77,7 @@ def authorize():
 def get_session(config):
     lcd(ser, "|  FreeBox     |    |      BeeOne  |")
     tmp = req('/api/v3/login/')
-    if (tmp['success'] == False):
+    if ((not tmp.has_key('success')) or (tmp['success'] == False)):
         sys.exit(2)
     if (tmp['result']['logged_in'] == False):
         hashed = hmac.new(str(config['app_token']), str(tmp['result']['challenge']), sha1)
