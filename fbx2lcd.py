@@ -76,19 +76,22 @@ def authorize():
 
 def get_session(config):
     lcd(ser, "|  FreeBox     |    |      BeeOne  |")
-    tmp = req('/api/v3/login/')
-    if ((not tmp.has_key('success')) or (tmp['success'] == False)):
-        sys.exit(2)
-    if (tmp['result']['logged_in'] == False):
-        hashed = hmac.new(str(config['app_token']), str(tmp['result']['challenge']), sha1)
-        password = hashed.hexdigest()
-        data = {}
-        data['app_id'] = APP_ID
-        data['password'] = password
-        session = req('/api/v3/login/session/', data)
-        if (session['success'] == False):
+    try:
+        tmp = req('/api/v3/login/')
+        if (tmp['success'] == False):
             return (False)
-        return (session['result']['session_token'])
+        if (tmp['result']['logged_in'] == False):
+            hashed = hmac.new(str(config['app_token']), str(tmp['result']['challenge']), sha1)
+            password = hashed.hexdigest()
+            data = {}
+            data['app_id'] = APP_ID
+            data['password'] = password
+            session = req('/api/v3/login/session/', data)
+            if (session['success'] == False):
+                return (False)
+            return (session['result']['session_token'])
+    except:
+        return False
 
 def open_and_load_config():
     if os.path.exists(CONFIG_FILE):
