@@ -17,16 +17,24 @@ APP_VERSION = '0.0.1'
 DEVICE_NAME = r('hostname').strip()
 
 STOK = ''
+COM = '/dev/ttyACM0'
 
-ser = serial.Serial('/dev/ttyACM0', 9600, timeout=20, parity=serial.PARITY_NONE)
+if len(sys.argv) > 1:
+    COM = sys.argv[1]
+
+ser = serial.Serial(COM, 9600, timeout=20, parity=serial.PARITY_NONE)
 
 lcd_clr(ser)
 lcd_wrap_on(ser)
 
 def sizeof_fmt(num):
     num /= 1024.0
-    return "%.2f Ko" % (num)
-
+    if num < 1024.0:
+        return "%.2f Ko" % (num)
+    else:
+        mo = int(num / 1000.0)
+        return "%d %03d Ko" % (mo, int(num) % 1000)
+        
 def req(path, data = ''):
     url = 'http://' + HOST + path
     try:
@@ -53,7 +61,7 @@ def authorize():
         return False
     config = {}
     config['app_token'] = res['result']['app_token']
-    print "app_token: " + APP_TOKEN
+    print "app_token: " + config['app_token']
     print "Please authorize app on your freebox.. i'm waiting"
     while True:
         time.sleep(1)
@@ -111,9 +119,15 @@ if __name__ == "__main__":
         if ((datas != False) and datas.has_key('success') and (datas['success'] == True)):
             lcd_clr(ser)
             if (int(datas['result']['rate_up']) > int(datas['result']['rate_down'])):
-                lcd_blue(ser)
+                if int(datas['result']['rate_up']) < (1024*1024):
+                    lcd_dark_blue(ser)
+                else:
+                    lcd_blue(ser)
             else:
-                lcd_green(ser)
+                if int(datas['result']['rate_down']) < (2*1024*1024):
+                    lcd_dark_green(ser)
+                else:
+                    lcd_green(ser)
             lcd(ser, "UP: % 11s     " % (sizeof_fmt(datas['result']['rate_up'])))
             lcd(ser, "DN: % 11s" % (sizeof_fmt(datas['result']['rate_down'])))
         else:

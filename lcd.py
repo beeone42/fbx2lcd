@@ -32,3 +32,15 @@ def lcd_green(ser):
 
 def lcd_blue(ser):
     lcd_bgcolor(ser, "8080ff")
+
+def lcd_dark_green(ser):
+    lcd_bgcolor(ser, "008000")
+
+def lcd_dark_blue(ser):
+    lcd_bgcolor(ser, "000080")
+
+def lcd_green_red(ser):
+    lcd_bgcolor(ser, "ffff00")
+
+def lcd_blue_red(ser):
+    lcd_bgcolor(ser, "ff80ff")
