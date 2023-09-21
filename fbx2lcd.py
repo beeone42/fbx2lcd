@@ -17,12 +17,17 @@ APP_VERSION = '0.0.1'
 DEVICE_NAME = r('hostname').strip()
 
 STOK = ''
-COM = '/dev/ttyACM0'
+COM = ['/dev/ttyACM0', '/dev/ttyACM1']
 
 if len(sys.argv) > 1:
-    COM = sys.argv[1]
+    COM = [sys.argv[1]]
 
-ser = serial.Serial(COM, 9600, timeout=20, parity=serial.PARITY_NONE)
+for C in COM:
+    try:
+        ser = serial.Serial(C, 9600, timeout=20, parity=serial.PARITY_NONE)
+        break
+    except Exception as err:
+        print("{err}");
 
 lcd_clr(ser)
 lcd_wrap_on(ser)
