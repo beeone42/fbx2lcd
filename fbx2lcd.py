@@ -135,6 +135,13 @@ if __name__ == "__main__":
                     lcd_green(ser)
             lcd(ser, "UP: % 11s     " % (sizeof_fmt(datas['result']['rate_up'])))
             lcd(ser, "DN: % 11s" % (sizeof_fmt(datas['result']['rate_down'])))
+            with open("/root/prom/freebox.prom", "w") as fichier:
+                fichier.write("# HELP freebox_rate_up upload rate\n")
+                fichier.write("# TYPE freebox_rate_up gauge\n")
+                fichier.write("freebox_rate_up " + str(datas['result']['rate_up']) + "\n")
+                fichier.write("# HELP freebox_rate_down download rate\n")
+                fichier.write("# TYPE freebox_rate_down gauge\n")
+                fichier.write("freebox_rate_down " + str(datas['result']['rate_down']) + "\n")
         else:
             STOK = get_session(config)
             print STOK
